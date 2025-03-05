@@ -46,4 +46,4 @@ connectDb()
   .catch((error) => console.log("Error occurred while connecting DB:", error));
 
 app.get("/", (req, res) => res.send("This is home page"));
-/*  https://8699-182-77-63-188.ngrok-free.app */
+

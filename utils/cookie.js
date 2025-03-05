@@ -11,7 +11,7 @@ function setCookie(res, tokenName, tokenValue) {
 
 function removeTokenFromCookie(res) {
   const options = {
-    expires: Date.now(),
+    expires: new Date(Date.now()),
     secure: true,
     path: "/",
     sameSite: "None"
