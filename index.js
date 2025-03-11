@@ -9,21 +9,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+
 // Allowed origins
 const allowedOrigins = [
   "https://591e-182-77-63-188.ngrok-free.app",
+  "*",
+  "http://192.168.1.45:3000",
   FRONTEND_URL
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: allowedOrigins,
     credentials: true
   })
 );
@@ -46,4 +43,3 @@ connectDb()
   .catch((error) => console.log("Error occurred while connecting DB:", error));
 
 app.get("/", (req, res) => res.send("This is home page"));
-

@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const {verifyToken} = require("../utils/token");
+const { verifyToken } = require("../utils/token");
 
 const getTokenFromHeaders = (req) => {
   const authHeader = req.headers["authorization"]; // Get the Authorization header
@@ -11,24 +11,17 @@ const getTokenFromHeaders = (req) => {
 
 const userAuth = async (req, res, next) => {
   try {
-    /* const token = getTokenFromHeaders(req); */
-    const cookie=req.cookies;
-    const {token}=cookie;
-   /*  console.log("token:",token) */
+    const { token } = req.cookies;
 
     if (!token)
       return res
         .status(404)
         .json({ message: "Token is missing!", success: false });
 
-    const decodedObject = verifyToken(token);
-    console.log("User is authenticated!");
-
-    // add userId to the body
-    req.body.user = { _id: decodedObject._id };
+    req.body.user = verifyToken(token);
     next();
   } catch (error) {
-    console.log("Authentication failed!Please login again!");
+    console.error("Authentication failed!", error);
     res.status(402).json({
       message: "Authentication failed!Please login again!",
       success: false

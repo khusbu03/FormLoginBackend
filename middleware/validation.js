@@ -2,12 +2,12 @@ const validateData = require("../utils/Validation/dataValidation");
 
 const validation = async (req, res, next) => {
   try {
-    let isSignUpData = true;
-    if (req.url === "/login") isSignUpData = false;
+    let isSignUpData = req.url !== "/login";
 
     const validation = validateData(req.body, isSignUpData);
+
     if (!validation.success) throw validation.error;
-    console.log("Data validated!");
+
     next();
   } catch (error) {
     console.log(
