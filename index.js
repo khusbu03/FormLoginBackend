@@ -1,6 +1,6 @@
+const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
-const express = require("express");
 const cookieParser = require("cookie-parser");
 const connectDb = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
@@ -9,13 +9,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-
 // Allowed origins
 const allowedOrigins = [
-  "https://591e-182-77-63-188.ngrok-free.app",
-  "*",
-  "http://192.168.1.45:3000",
-  FRONTEND_URL
+  process.env.FRONTEND_URL,
+  "http://localhost:3000",
+  "http://localhost:5173"
 ];
 
 app.use(
@@ -29,8 +27,8 @@ app.use(
 app.options("*", cors());
 
 // Middleware
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
 
 // Routes
 app.use("/", userRoutes);

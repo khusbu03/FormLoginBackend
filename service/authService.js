@@ -1,13 +1,14 @@
 const User = require("../models/User");
-const { setCookie } = require("../utils/cookie");
+const { setTokenInHeader, getTokenFromHeader } = require("../utils/header");
+
 const { createToken } = require("../utils/token");
+
 const {
   validatePassword,
   createPasswordHash
 } = require("../utils/Validation/passwordValidation");
 const { generateOTP, verifyOTP, hashOTP } = require("../utils/OTP");
 const sendOTPEmail = require("../utils/sendOTPEmail");
-const OTP = require("../models/OTP");
 
 async function loginService(req, res) {
   try {
@@ -27,7 +28,7 @@ async function loginService(req, res) {
 
     const token = createToken({ _id: existingUser._id });
 
-    setCookie(res, "token", token);
+    setTokenInHeader(res, token);
 
     existingUser.password = undefined;
     return {
@@ -99,18 +100,17 @@ async function forgotPasswordService(req, res) {
     const hashedOTP = await hashOTP(otp);
     console.log("hashed otp", hashedOTP);
 
-    const newOTP = new OTP({
-      emailId: emailId,
-      otp: hashedOTP,
-      expiresAt: Date.now() + 10 * 60
-    });
+    const updatedUser = await User.findOneAndUpdate(
+      { emailId },
+      { otp: hashedOTP }
+    );
+    console.log("updatedUser User", updatedUser);
 
-    await newOTP.save();
     return {
       success: true,
       message: `OTP sent successfully on ${emailId}`,
-      data: emailResponse.data,
-      OTP: otp
+      data: emailResponse.data
+      /*  OTP: otp */
     };
   } catch (error) {
     return {
@@ -122,33 +122,40 @@ async function forgotPasswordService(req, res) {
 
 async function verifyOTPSevice(req, res) {
   try {
-    const { otp } = req.body;
+    const { otp, emailId } = req.body;
     if (!otp) throw new Error("otp is required");
+    if (!emailId) throw new Error("emailId is required");
 
-    const otpHash = await hashOTP(otp);
-    console.log("hashed otp", otpHash);
+    const existingUser = await User.findOne({ emailId });
+    if (!existingUser) throw new Error("Invalid credentials");
+    console.log("existingUser", existingUser);
 
-    const existingOTP = await OTP.findOne({ otp: otpHash });
-    if (!existingOTP) throw new Error("Invalid otp");
-    console.log("existingOTP", existingOTP);
+    console.log("otp", otp);
+    // verify otp
+    const isValidOtp = verifyOTP(otp, existingUser.otp);
+    console.log("isValidOtp", isValidOtp);
+    if (!isValidOtp) throw new Error("Invalid credentials");
 
-    const resetPasswordToken = createToken({ emailId: existingOTP.emailId });
-    //set COOKie
-    setCookie(res, "resetPasswordToken", resetPasswordToken);
+    const token = createToken({ emailId: existingUser.emailId });
+    //set header
+    setTokenInHeader(res, token);
 
     //find user by emaiId and save the user info with the token
-    const existingUser = await User.findOneAndUpdate(
-      { emailId: existingOTP.emailId },
-      { resetPasswordToken }
+    const updatedUser = await User.findOneAndUpdate(
+      { emailId: existingUser.emailId },
+      { token: token, otp: "" },
+      { new: true }
     );
-    console.log("existing User", existingUser);
+
+    console.log("updatedUser User", updatedUser);
 
     return {
       success: true,
       message: "OTP verified!",
-      token: resetPasswordToken
+      token: token
     };
   } catch (error) {
+    console.log("error", error);
     return {
       success: false,
       message: error.message
@@ -158,28 +165,27 @@ async function verifyOTPSevice(req, res) {
 
 async function updatePasswordService(req) {
   try {
-    const { newPassword,resetPasswordTokenk} = req.body;
+    const { newPassword } = req.body;
+    const token = getTokenFromHeader(req);
+    /* console.log("token",token) */
 
-    if (!resetPasswordToken) throw new Error("Token is missing");
+    if (!token) throw new Error("Token is missing");
     if (!newPassword) throw new Error("new Password is required");
 
-    const existingUser = await User.findOne({ token: resetPasswordToken });
+    const existingUser = await User.findOne({ token });
     if (!existingUser) throw new Error("Invalid Token");
 
     const newPasswordHash = await createPasswordHash(newPassword);
 
     const updatedUser = await User.findOneAndUpdate(
       { emailId: existingUser.emailId },
-      { password: newPasswordHash },
+      { password: newPasswordHash, token: "" },
       { new: true }
     );
-    updatedUser.password = undefined;
-    updatedUser.token = undefined;
 
     return {
       success: true,
-      message: "password updated!",
-      user: updatedUser
+      message: "password updated!"
     };
   } catch (error) {
     return {

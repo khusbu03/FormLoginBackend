@@ -17,9 +17,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    token:{
-      type:String,
-      expires:60*60
+    otp: {
+      type: String,
+      expires: 600
+    },
+    token: {
+      type: String,
+      expires: 60 * 60
     }
   },
   {

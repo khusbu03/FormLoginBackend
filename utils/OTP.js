@@ -6,8 +6,8 @@ function generateOTP(length = 6) {
 }
 
 function verifyOTP(inputOTP, storedHash) {
-  const hashedInputOTP = hashOTP(inputOTP);
-  return hashedInputOTP === storedHash;
+  const otpHash = hashOTP(inputOTP);
+  return otpHash === storedHash;
 }
 
 function hashOTP(otp) {

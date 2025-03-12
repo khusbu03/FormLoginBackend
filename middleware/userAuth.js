@@ -1,17 +1,11 @@
 const User = require("../models/User");
 const { verifyToken } = require("../utils/token");
-
-const getTokenFromHeaders = (req) => {
-  const authHeader = req.headers["authorization"]; // Get the Authorization header
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null; // Return null if the token is missing or improperly formatted
-  }
-  return authHeader.split(" ")[1]; // Extract the token (Bearer <token>)
-};
+const { getTokenFromHeaders } = require("../utils/header");
 
 const userAuth = async (req, res, next) => {
   try {
-    const { token } = req.cookies;
+    const token = getTokenFromHeaders(req);
+    console.log("token", token);
 
     if (!token)
       return res
