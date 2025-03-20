@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const { setTokenInHeader, getTokenFromHeader } = require("../utils/header");
-
-const { createToken } = require("../utils/token");
+const { createToken, createRefreshToken } = require("../utils/token");
 
 const {
   validatePassword,
@@ -18,6 +17,7 @@ async function loginService(req, res) {
 
     const existingUser = await User.findOne({ emailId });
     if (!existingUser) throw new Error("User not found!");
+    console.log("existingUser", existingUser);
 
     const isPasswordValid = await validatePassword(
       password,
@@ -26,15 +26,25 @@ async function loginService(req, res) {
 
     if (!isPasswordValid) throw new Error("Invalid credentials!");
 
-    const token = createToken({ _id: existingUser._id });
+    const accessToken = createToken({ _id: existingUser._id });
+    const refreshToken = createRefreshToken({ _id: existingUser._id });
 
-    setTokenInHeader(res, token);
+    setTokenInHeader(res, accessToken);
+    const updatedUser = await User.findOneAndUpdate(
+      { emailId },
+      {
+        refreshToken: refreshToken
+      },
+      { new: true }
+    );
 
     existingUser.password = undefined;
     return {
       success: true,
-      data: existingUser,
-      token: token
+      data: {
+        refreshToken: refreshToken,
+        accessToken: accessToken
+      }
     };
   } catch (error) {
     return {

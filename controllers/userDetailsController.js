@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const { getUserDetailsService } = require("../service/userService");
+const { getUserDetailsService } = require("../service/user.Service");
 
 const userDetails = async (req, res) => {
   try {

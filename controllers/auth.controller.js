@@ -4,7 +4,7 @@ const {
   forgotPasswordService,
   verifyOTPSevice,
   updatePasswordService
-} = require("../service/authService");
+} = require("../service/auth.Service");
 
 async function login(req, res) {
   try {
@@ -16,7 +16,8 @@ async function login(req, res) {
 
     return res.status(200).json({
       message: "User LoggedIn!",
-      success: true
+      success: true,
+      data: response.data
     });
   } catch (error) {
     res.status(400).json({
@@ -28,7 +29,6 @@ async function login(req, res) {
 
 async function logout(req, res) {
   try {
-
     res.status(200).json({ message: "Logged out!", success: true });
   } catch (error) {
     console.log("error ", error);

@@ -3,9 +3,14 @@ function setTokenInHeader(res, token) {
 }
 
 function getTokenFromHeader(req) {
+  //it gets the access token
   const authHeader = req.headers["authorization"];
-  const token = authHeader.replace("Bearer ", "");
-  return token;
+  if(authHeader){
+    const token = authHeader.replace("Bearer ", "");
+    return token;
+  }
+  return null;
+  
 }
 
 module.exports = {

@@ -19,11 +19,21 @@ const userSchema = new mongoose.Schema(
     },
     otp: {
       type: String,
-      expires: 600
+      expires: 600 // 10min
     },
     token: {
       type: String,
       expires: 60 * 60
+    },
+    todos: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Todo"
+      }
+    ],
+    refreshToken: {
+      type: String,
+      expires: 7 * 24 * 60 * 60
     }
   },
   {

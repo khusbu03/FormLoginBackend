@@ -4,6 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDb = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
+const todoRoutes = require("./routes/todoRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Routes
+app.use("/todo",todoRoutes);
 app.use("/", userRoutes);
 
 connectDb()

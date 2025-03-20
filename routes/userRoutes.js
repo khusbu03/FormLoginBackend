@@ -1,6 +1,6 @@
 const router = require("express").Router();
 
-const userAuth = require("../middleware/userAuth");
+const {userAuth,generateAccessToken} = require("../middleware/userAuth");
 const validation = require("../middleware/validation");
 const emailLimiter = require("../middleware/emailLimiter");
 
@@ -25,5 +25,6 @@ router.post("/updatePassword", updatePassword);
 router.get("/getUserDetails", userAuth, userDetails);
 
 router.post("/shortenUrl", urlShortener);
+router.post("/generateAccessToken", generateAccessToken);
 
 module.exports = router;
