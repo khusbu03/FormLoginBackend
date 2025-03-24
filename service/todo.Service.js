@@ -13,12 +13,8 @@ const createTodoService = async (req) => {
     if (!title || !description)
       return new ApiError(400, "All fields are required");
 
-    const existingUser = await User.findOne({ _id });
-    if (!existingUser) return new ApiError(401, "User does not exist");
+    const totalTodosOfUser = await Todo.countDocuments({ userId: _id });
 
-    const totalTodosOfUser = existingUser.todos.length;
-
-    // create new todo
     const newTodo = new Todo({
       title,
       description,
@@ -28,7 +24,6 @@ const createTodoService = async (req) => {
 
     await newTodo.save();
 
-    // update the correponding user and update the user and add the todo id in the users todos
     const updatedUser = await User.findOneAndUpdate(
       { _id },
       { $push: { todos: newTodo._id } }
@@ -64,7 +59,7 @@ const getAllTodosService = async (req) => {
 
     return new ApiResponse(
       200,
-      `Successfully fetched all todos of user: ${_id}`,
+      `Successfully fetched all todos of user: ${userId}`,
       allTodo
     );
   } catch (error) {
@@ -105,19 +100,15 @@ const getTodoByIdService = async (req) => {
 
 const updateTodoService = async (req) => {
   try {
-    const { title, description, filter, deadline, priority, status } = req.body;
-
     const { todoId } = req.params;
     const { _id: userId } = req.body.user;
-    console.log("todoId", todoId);
-    console.log("userId", userId);
 
     const updatedTodo = await Todo.findOneAndUpdate(
       {
         _id: new mongoose.Types.ObjectId(todoId),
         userId: new mongoose.Types.ObjectId(userId)
       },
-      { title, description, filter, deadline, priority, status },
+      req.body,
       { new: true }
     );
     console.log("updatedTodo:-", updatedTodo);
@@ -183,11 +174,38 @@ const reorderTodoService = async (req) => {
   }
 };
 
+const searchTodoService = async (req) => {
+  try {
+    const { search } = req.query;
+    const { _id: userId } = req.body.user;
+
+    if (!search) return new ApiError("Search term is required");
+    console.log("search ", search);
+
+    // Escape regex special characters
+    const escapedQuery = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const todos = await Todo.find({
+      userId,
+      $or: [
+        { title: { $regex: escapedQuery, $options: "i" } },
+        { description: { $regex: escapedQuery, $options: "i" } }
+      ]
+    });
+
+    if (!todos.length) return new ApiError(404, "No todos");
+    return new ApiResponse(200, "Fetched todos", todos);
+  } catch (error) {
+    return new ApiError(400, error.message);
+  }
+};
+
 module.exports = {
   createTodoService,
   getAllTodosService,
   deleteTodoService,
   updateTodoService,
   getTodoByIdService,
-  reorderTodoService
+  reorderTodoService,
+  searchTodoService
 };

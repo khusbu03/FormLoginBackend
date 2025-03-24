@@ -6,16 +6,15 @@ const {
   deleteTodo,
   getAllTodos,
   getTodoById,
-  reorderTodo
+  reorderTodo,
 } = require("../controllers/todo.controlller");
 
 const { userAuth } = require("../middleware/userAuth");
-
 todoRouter.post("/", userAuth, createTodo);
 todoRouter.get("/", userAuth, getAllTodos);
 
 todoRouter.delete("/:todoId", userAuth, deleteTodo);
-todoRouter.put("/:todoId", userAuth, updateTodo);
+todoRouter.patch("/:todoId", userAuth, updateTodo);
 todoRouter.get("/:todoId", userAuth, getTodoById);
 
 todoRouter.post("/reorder", userAuth, reorderTodo);

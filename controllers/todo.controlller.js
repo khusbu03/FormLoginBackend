@@ -4,7 +4,8 @@ const {
   deleteTodoService,
   getTodoByIdService,
   updateTodoService,
-  reorderTodoService
+  reorderTodoService,
+  searchTodoService
 } = require("../service/todo.Service");
 
 const ApiError = require("../utils/ApiError");
@@ -31,14 +32,17 @@ async function createTodo(req, res) {
 
 async function getAllTodos(req, res) {
   try {
-    const getTodoServiceResponse = await getAllTodosService(req);
+    const { search } = req.query;
+    let serviceResponse;
+    if (search) serviceResponse = await searchTodoService(req);
+    else serviceResponse = await getAllTodosService(req);
 
-    if (!getTodoServiceResponse.success) throw getTodoServiceResponse;
+    if (!serviceResponse.success) throw serviceResponse;
 
-    return res.status(getTodoServiceResponse.statusCode).json({
+    return res.status(serviceResponse.statusCode).json({
       success: true,
-      message: getTodoServiceResponse.message,
-      data: getTodoServiceResponse.data
+      message: serviceResponse.message,
+      data: serviceResponse.data
     });
   } catch (error) {
     return res.status(error.statusCode).json({
@@ -129,5 +133,5 @@ module.exports = {
   deleteTodo,
   updateTodo,
   getTodoById,
-  reorderTodo,
+  reorderTodo
 };
