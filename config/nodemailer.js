@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
-const ApiError = require("../utils/apiError1");
-const ApiResponse = require("../utils/apiResponse1");
+const ApiError = require("../utils/apiError");
+const ApiResponse = require("../utils/apiResponse");
 
 async function sendEmail(mailOptions) {
   try {

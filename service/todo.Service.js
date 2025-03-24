@@ -2,8 +2,8 @@ const Todo = require("../models/Todo");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
-const ApiError = require("../utils/apiError1");
-const ApiResponse = require("../utils/apiResponse1");
+const ApiError = require("../utils/apiError");
+const ApiResponse = require("../utils/apiResponse");
 
 const createTodoService = async (req) => {
   try {
