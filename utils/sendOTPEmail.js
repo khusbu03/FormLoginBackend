@@ -1,6 +1,6 @@
 const { Error } = require("mongoose");
 const sendEmail = require("../config/nodemailer");
-const ApiError = require("./ApiError");
+const ApiError = require("./apiError");
 const ApiResponse = require("./apiResponse");
 
 const sendOTPEmail = async (data) => {

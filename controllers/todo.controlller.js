@@ -8,8 +8,8 @@ const {
   searchTodoService
 } = require("../service/todo.Service");
 
-const ApiError = require("../utils/ApiError");
-const ApiResponse = require("../utils/ApiResponse");
+const ApiError = require("../utils/apiError");
+const ApiResponse = require("../utils/apiResponse");
 
 async function createTodo(req, res) {
   try {
